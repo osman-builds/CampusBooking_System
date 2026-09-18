@@ -69,3 +69,13 @@ CampusBooking_System/
 ## Documentation
 - Detailed prompt design, architecture justification, and preliminary comparison:  
   👉 [Milestone 1 Report: System Design & Codebase Generation](docs/milestone_1_system_design_and_codebases.md)
+
+---
+
+## Team Contributions (Milestone 1)
+
+| Team Member | Role / Focus Area | Deliverable |
+| :--- | :--- | :--- |
+| **Abdullahi Osman** | System Architecture & GenAI Codebases | Scoped-down design, Prompts A/B, Codebase setup |
+| **[Teammate 1]** | Code Smell Analysis | Codebase A vs. B smells & technical evidence |
+| **[Teammate 2]** | Fowler Refactoring | Refactoring implementation & quality metrics |
