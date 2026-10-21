@@ -10,7 +10,7 @@ Adheres to SOLID principles:
 """
 
 import datetime
-import random
+import secrets
 import string
 from dataclasses import dataclass
 from typing import Dict, List, Optional
@@ -185,7 +185,8 @@ class BookingService:
 
         # 6. Generate confirmation token & persist
         clean_date = date_str.replace("-", "")
-        token = f"SKD-{clean_date}-" + "".join(random.choices(string.ascii_uppercase + string.digits, k=6))
+        suffix = "".join(secrets.choice(string.ascii_uppercase + string.digits) for _ in range(6))
+        token = f"SKD-{clean_date}-{suffix}"
         reservation = Reservation(
             booking_id=0,
             token=token,

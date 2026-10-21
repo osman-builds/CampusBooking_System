@@ -14,7 +14,7 @@ Refactorings Applied to Resolve Code Smells in Codebase A:
 """
 
 import datetime
-import random
+import secrets
 import string
 from dataclasses import dataclass
 from typing import Dict, List, Optional
@@ -196,7 +196,8 @@ class BookingSystem:
         pricing = PricingCalculator.calculate(room["room_type"], user["role"], date_str, duration)
 
         # Generate Token & Record
-        token = f"SKD-{date_str.replace('-', '')}-" + "".join(random.choices(string.ascii_uppercase + string.digits, k=6))
+        suffix = "".join(secrets.choice(string.ascii_uppercase + string.digits) for _ in range(6))
+        token = f"SKD-{date_str.replace('-', '')}-{suffix}"
         record = {
             "booking_id": self.booking_counter,
             "token": token,

@@ -127,8 +127,8 @@ class BookingSystem:
             discount, surcharge = 0.0, 0.0
             total_cost = base_cost
 
-        # 6. Generate confirmation token and persist
-        token = f"SKD-{booking_date.strftime('%Y%m%d')}-" + "".join(random.choices(string.ascii_uppercase + string.digits, k=6))
+        token_suffix = "".join(secrets.choice(string.ascii_uppercase + string.digits) for _ in range(6))
+        token = f"SKD-{booking_date.strftime('%Y%m%d')}-{token_suffix}"
         record = {
             "booking_id": self.booking_counter,
             "token": token,
