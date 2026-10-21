@@ -1,6 +1,9 @@
 """
-Domain Models for Campus Facility & Room Booking System (Codebase B)
-Adheres to Single Responsibility Principle (SRP) by encapsulating domain state.
+Campus Facility & Room Booking System (Codebase B)
+Module: models.py - Domain Entities, Enums, and Domain Exceptions
+
+Adheres to Domain-Driven Design (DDD) and Single Responsibility Principle (SRP).
+Encapsulates all domain state, validation, and domain-specific exceptions.
 """
 
 from dataclasses import dataclass, field
@@ -9,29 +12,54 @@ from enum import Enum
 from typing import Optional
 
 
+# --- Enums ---
 class UserRole(str, Enum):
-    """Enumeration of user roles within the campus ecosystem."""
-    STUDENT = "STUDENT"
-    STAFF = "STAFF"
-    ADMIN = "ADMIN"
+    STUDENT = "student"
+    FACULTY = "faculty"
+    STAFF = "staff"
+    ADMIN = "admin"
 
 
 class RoomType(str, Enum):
-    """Enumeration of facility/room categories."""
-    STANDARD = "STANDARD"
-    LAB = "LAB"
-    STUDIO = "STUDIO"
+    STANDARD = "standard"
+    LAB = "lab"
+    STUDIO = "studio"
 
 
 class ReservationStatus(str, Enum):
-    """Lifecycle states of a reservation."""
     CONFIRMED = "CONFIRMED"
     CANCELLED = "CANCELLED"
 
 
+# --- Domain Exceptions ---
+class BookingException(Exception):
+    """Base exception for booking domain errors."""
+    pass
+
+
+class ResourceNotFoundError(BookingException):
+    """Raised when user or room does not exist."""
+    pass
+
+
+class OperatingHoursExceededError(BookingException):
+    """Raised when booking is outside 08:00 - 22:00 operating window."""
+    pass
+
+
+class SlotConflictError(BookingException):
+    """Raised when room is already reserved for the requested slot."""
+    pass
+
+
+class QuotaExceededError(BookingException):
+    """Raised when student exceeds max 2 hours daily allowance."""
+    pass
+
+
+# --- Domain Entities ---
 @dataclass(frozen=True)
 class User:
-    """Represents an authorized system user."""
     user_id: str
     name: str
     role: UserRole
@@ -39,42 +67,39 @@ class User:
     is_active: bool = True
 
     def is_student(self) -> bool:
-        """Convenience method checking student role."""
         return self.role == UserRole.STUDENT
 
 
 @dataclass(frozen=True)
 class Room:
-    """Represents a reservable campus space."""
     room_id: str
     name: str
     room_type: RoomType
     capacity: int
-    base_hourly_rate: float
+    hourly_rate: float
     is_active: bool = True
 
 
 @dataclass
 class Reservation:
-    """Represents a finalized booking for a room."""
-    id: int
-    confirmation_token: str
+    booking_id: int
+    token: str
     user_id: str
     room_id: str
-    start_time: datetime
-    end_time: datetime
+    date_str: str
+    start_hour: int
+    end_hour: int
+    base_cost: float
+    discount: float
+    surcharge: float
     total_cost: float
     status: ReservationStatus = ReservationStatus.CONFIRMED
     created_at: datetime = field(default_factory=datetime.now)
-    cancelled_at: Optional[datetime] = None
 
     @property
-    def duration_hours(self) -> float:
-        """Calculates reservation duration in decimal hours."""
-        delta = self.end_time - self.start_time
-        return delta.total_seconds() / 3600.0
+    def duration(self) -> int:
+        return self.end_hour - self.start_hour
 
     @property
     def is_active(self) -> bool:
-        """Returns True if the reservation is actively confirmed."""
         return self.status == ReservationStatus.CONFIRMED
