@@ -2,10 +2,12 @@
 Campus Facility & Room Booking System (Inspired by Skedda)
 Codebase A: Monolithic Single-Script Implementation
 
-This module contains the entire backend reservation logic implemented within
-a single monolithic class 'BookingSystem'. All state is managed in-memory
-using native Python data structures (dictionaries and lists), and procedural
-business logic is executed sequentially.
+All state and procedural logic are contained inside one single class 'BookingSystem'.
+Designed to be small, simple, and self-contained while exhibiting classic code smells:
+- God Class / Large Class
+- Long Method (create_booking)
+- Duplicate Code (pricing & fee branches)
+- Primitive Obsession (raw dictionaries and string keys)
 """
 
 import datetime
@@ -14,442 +16,179 @@ import string
 
 
 class BookingSystem:
-    """
-    Monolithic reservation management system containing all data storage,
-    validation, collision detection, fee calculation, and notification logic.
-    """
+    """Monolithic reservation system managing storage, rules, pricing, and receipts."""
 
     def __init__(self):
-        # In-memory storage for users, rooms, and reservations
         self.users = {}          # user_id -> dict
         self.rooms = {}          # room_id -> dict
-        self.reservations = []   # list of raw reservation dicts
+        self.reservations = []   # list of raw dicts
         self.booking_counter = 1
 
-    # -------------------------------------------------------------------------
-    # User Registration
-    # -------------------------------------------------------------------------
     def register_user(self, user_id, name, role, email=""):
-        """
-        Registers a new user with rudimentary string validation.
-        Valid roles: 'student', 'faculty', 'staff', 'admin'
-        """
-        if not isinstance(user_id, str) or not user_id.strip():
-            print(f"[ERROR] User registration failed: Invalid user_id '{user_id}'. Must be a non-empty string.")
+        role_clean = str(role).strip().lower()
+        if role_clean not in ["student", "faculty", "staff", "admin"]:
+            print(f"[ERROR] Invalid role '{role}'. Allowed: student, faculty, staff, admin.")
             return False
-
-        if not isinstance(name, str) or not name.strip():
-            print(f"[ERROR] User registration failed: Invalid name '{name}'. Must be a non-empty string.")
+        if user_id in self.users:
+            print(f"[ERROR] User ID '{user_id}' already exists.")
             return False
-
-        normalized_role = str(role).strip().lower()
-        if normalized_role not in ["student", "faculty", "staff", "admin"]:
-            print(f"[ERROR] User registration failed: Invalid role '{role}'. Allowed roles: student, faculty, staff, admin.")
-            return False
-
-        user_id_clean = user_id.strip()
-        if user_id_clean in self.users:
-            print(f"[ERROR] User registration failed: User ID '{user_id_clean}' already exists.")
-            return False
-
-        # Store raw user dictionary
-        self.users[user_id_clean] = {
-            "user_id": user_id_clean,
-            "name": name.strip(),
-            "role": normalized_role,
-            "email": email.strip() if isinstance(email, str) else "",
+        self.users[user_id] = {
+            "user_id": user_id,
+            "name": name,
+            "role": role_clean,
+            "email": email,
             "is_active": True
         }
-        print(f"[SUCCESS] User '{name.strip()}' ({normalized_role}) registered successfully with ID: {user_id_clean}")
+        print(f"[SUCCESS] Registered User '{name}' ({role_clean}) [{user_id}]")
         return True
 
-    # -------------------------------------------------------------------------
-    # Room Registration
-    # -------------------------------------------------------------------------
-    def register_room(self, room_id, room_name, room_type, capacity):
-        """
-        Registers a new room facility with rudimentary capacity and string validation.
-        Valid types: 'standard', 'lab', 'studio'
-        """
-        if not isinstance(room_id, str) or not room_id.strip():
-            print(f"[ERROR] Room registration failed: Invalid room_id '{room_id}'. Must be a non-empty string.")
+    def register_room(self, room_id, name, room_type, capacity):
+        type_clean = str(room_type).strip().lower()
+        if type_clean not in ["standard", "lab", "studio"]:
+            print(f"[ERROR] Invalid room_type '{room_type}'. Allowed: standard, lab, studio.")
             return False
-
-        if not isinstance(room_name, str) or not room_name.strip():
-            print(f"[ERROR] Room registration failed: Invalid room_name '{room_name}'. Must be a non-empty string.")
+        if room_id in self.rooms:
+            print(f"[ERROR] Room ID '{room_id}' already exists.")
             return False
-
-        normalized_type = str(room_type).strip().lower()
-        if normalized_type not in ["standard", "lab", "studio"]:
-            print(f"[ERROR] Room registration failed: Invalid room_type '{room_type}'. Allowed types: standard, lab, studio.")
-            return False
-
-        if not isinstance(capacity, int) or capacity <= 0:
-            print(f"[ERROR] Room registration failed: Invalid capacity '{capacity}'. Must be a positive integer.")
-            return False
-
-        room_id_clean = room_id.strip()
-        if room_id_clean in self.rooms:
-            print(f"[ERROR] Room registration failed: Room ID '{room_id_clean}' already exists.")
-            return False
-
-        # Store raw room dictionary
-        self.rooms[room_id_clean] = {
-            "room_id": room_id_clean,
-            "room_name": room_name.strip(),
-            "room_type": normalized_type,
+        self.rooms[room_id] = {
+            "room_id": room_id,
+            "name": name,
+            "room_type": type_clean,
             "capacity": capacity,
             "is_active": True
         }
-        print(f"[SUCCESS] Room '{room_name.strip()}' ({normalized_type}, Cap: {capacity}) registered with ID: {room_id_clean}")
+        print(f"[SUCCESS] Registered Room '{name}' ({type_clean}, Cap: {capacity}) [{room_id}]")
         return True
 
-    # -------------------------------------------------------------------------
-    # Core Monolithic Booking Creation Method
-    # -------------------------------------------------------------------------
     def create_booking(self, user_id, room_id, date_str, start_hour, end_hour):
-        """
-        Creates a room booking through a sequential monolithic execution pipeline:
-        1. User existence & active status verification
-        2. Room existence & capacity/availability verification
-        3. Operating bounds verification (08:00 to 22:00)
-        4. Overlapping collision detection using nested loops
-        5. Student daily quota restriction (max 2 hours/day)
-        6. Nested pricing logic (base cost, student discount, weekend surcharge)
-        7. Confirmation token generation and mock email receipt printing
-        """
-        print(f"\n--- Initiating Booking Request: User '{user_id}', Room '{room_id}', Date '{date_str}', Time: {start_hour}:00 - {end_hour}:00 ---")
-
-        # 1. Verify user existence and active status
-        if user_id not in self.users:
-            print(f"[REJECTED] User validation failed: User ID '{user_id}' does not exist in the system.")
+        """Monolithic sequential procedure performing all validation, pricing, and receipts."""
+        # 1. User & Room validation
+        if user_id not in self.users or not self.users[user_id].get("is_active"):
+            print(f"[REJECTED] Active user '{user_id}' not found.")
+            return None
+        if room_id not in self.rooms or not self.rooms[room_id].get("is_active"):
+            print(f"[REJECTED] Active room '{room_id}' not found.")
             return None
 
         user = self.users[user_id]
-        if not user.get("is_active", False):
-            print(f"[REJECTED] User validation failed: User account '{user_id}' is inactive or suspended.")
-            return None
-
-        # 2. Verify room existence and room capacity/status
-        if room_id not in self.rooms:
-            print(f"[REJECTED] Room validation failed: Room ID '{room_id}' does not exist in the system.")
-            return None
-
         room = self.rooms[room_id]
-        if not room.get("is_active", False):
-            print(f"[REJECTED] Room validation failed: Room '{room_id}' is currently decommissioned/inactive.")
+
+        # 2. Operating hours check (08:00 to 22:00)
+        if start_hour < 8 or end_hour > 22 or start_hour >= end_hour:
+            print(f"[REJECTED] Operating bounds exceeded: 08:00-22:00 required (requested {start_hour}:00-{end_hour}:00).")
             return None
 
-        if room.get("capacity", 0) <= 0:
-            print(f"[REJECTED] Room validation failed: Room '{room_id}' has invalid capacity ({room.get('capacity')}).")
-            return None
-
-        # 3. Check operating bounds (08:00 to 22:00) and slot consistency
-        if not isinstance(start_hour, int) or not isinstance(end_hour, int):
-            print(f"[REJECTED] Hours validation failed: Start hour and end hour must be whole numbers (integers).")
-            return None
-
-        if start_hour < 8 or end_hour > 22:
-            print(f"[REJECTED] Operating bounds exceeded: Campus facility operates strictly between 08:00 and 22:00. Requested: {start_hour}:00 to {end_hour}:00.")
-            return None
-
-        if start_hour >= end_hour:
-            print(f"[REJECTED] Time sequence invalid: Start hour ({start_hour}:00) must be earlier than end hour ({end_hour}:00).")
-            return None
-
-        # Parse date string to validate format and retrieve day of week
         try:
             booking_date = datetime.datetime.strptime(date_str, "%Y-%m-%d").date()
         except (ValueError, TypeError):
-            print(f"[REJECTED] Date format invalid: '{date_str}'. Expected ISO format 'YYYY-MM-DD'.")
+            print(f"[REJECTED] Invalid date format '{date_str}'. Expected 'YYYY-MM-DD'.")
             return None
 
-        # 4. Detect overlapping time slot collisions using nested loops
-        # Outer loop iterates through existing reservations; inner loop iterates hour by hour
+        # 3. Schedule collision check (nested loops over hour ranges)
         for existing in self.reservations:
-            if existing["room_id"] == room_id and existing["date"] == date_str:
-                if existing["status"] == "CONFIRMED":
-                    # Nested loop over every hour in requested slot vs existing slot
-                    for req_hour in range(start_hour, end_hour):
-                        for exist_hour in range(existing["start_hour"], existing["end_hour"]):
-                            if req_hour == exist_hour:
-                                print(f"[CONFLICT REJECTED] Schedule collision: Room '{room['room_name']}' is already booked from "
-                                      f"{existing['start_hour']:02d}:00 to {existing['end_hour']:02d}:00 on {date_str} "
-                                      f"(Booking #{existing['booking_id']}).")
-                                return None
+            if existing["room_id"] == room_id and existing["date"] == date_str and existing["status"] == "CONFIRMED":
+                for req_h in range(start_hour, end_hour):
+                    for exist_h in range(existing["start_hour"], existing["end_hour"]):
+                        if req_h == exist_h:
+                            print(f"[CONFLICT] Room '{room['name']}' already booked {existing['start_hour']:02d}:00-{existing['end_hour']:02d}:00.")
+                            return None
 
-        # 5. Enforce Student daily quota limit (max 2 hours per day across all rooms)
-        booking_duration = end_hour - start_hour
+        # 4. Student daily quota restriction (max 2 hours/day)
+        duration = end_hour - start_hour
         if user["role"] == "student":
-            student_hours_today = 0
-            for existing in self.reservations:
-                if existing["user_id"] == user_id and existing["date"] == date_str:
-                    if existing["status"] == "CONFIRMED":
-                        student_hours_today += (existing["end_hour"] - existing["start_hour"])
-
-            if student_hours_today + booking_duration > 2:
-                print(f"[QUOTA REJECTED] Student quota exceeded: Students may book at most 2 hours per day. "
-                      f"User '{user['name']}' already has {student_hours_today} hour(s) booked on {date_str}. "
-                      f"Requesting {booking_duration} additional hour(s) would exceed the 2-hour daily allowance.")
+            booked_today = sum(
+                (r["end_hour"] - r["start_hour"])
+                for r in self.reservations
+                if r["user_id"] == user_id and r["date"] == date_str and r["status"] == "CONFIRMED"
+            )
+            if booked_today + duration > 2:
+                print(f"[QUOTA] Student '{user['name']}' exceeded daily limit (max 2 hrs; already booked {booked_today} hrs).")
                 return None
 
-        # 6. Calculate Pricing with Nested if-elif-else logic
-        # Base rates: Standard = $20/hr, Lab/Studio = $35/hr
-        # Student discount: 15% off base rate
-        # Weekend peak surcharge: 20% added
-        is_weekend = booking_date.weekday() >= 5  # 5=Saturday, 6=Sunday
-
+        # 5. Pricing calculation (Code Smell: duplicated branching logic)
+        is_weekend = booking_date.weekday() >= 5
         if room["room_type"] == "standard":
             hourly_rate = 20.0
-            base_cost = booking_duration * hourly_rate
-            if user["role"] == "student":
-                discount_amount = base_cost * 0.15
-                subtotal = base_cost - discount_amount
-                if is_weekend:
-                    surcharge_amount = subtotal * 0.20
-                    total_cost = subtotal + surcharge_amount
-                else:
-                    surcharge_amount = 0.0
-                    total_cost = subtotal
-            else:
-                discount_amount = 0.0
-                subtotal = base_cost
-                if is_weekend:
-                    surcharge_amount = subtotal * 0.20
-                    total_cost = subtotal + surcharge_amount
-                else:
-                    surcharge_amount = 0.0
-                    total_cost = subtotal
+            base_cost = duration * hourly_rate
+            discount = base_cost * 0.15 if user["role"] == "student" else 0.0
+            subtotal = base_cost - discount
+            surcharge = subtotal * 0.20 if is_weekend else 0.0
+            total_cost = subtotal + surcharge
         elif room["room_type"] in ["lab", "studio"]:
             hourly_rate = 35.0
-            base_cost = booking_duration * hourly_rate
-            if user["role"] == "student":
-                discount_amount = base_cost * 0.15
-                subtotal = base_cost - discount_amount
-                if is_weekend:
-                    surcharge_amount = subtotal * 0.20
-                    total_cost = subtotal + surcharge_amount
-                else:
-                    surcharge_amount = 0.0
-                    total_cost = subtotal
-            else:
-                discount_amount = 0.0
-                subtotal = base_cost
-                if is_weekend:
-                    surcharge_amount = subtotal * 0.20
-                    total_cost = subtotal + surcharge_amount
-                else:
-                    surcharge_amount = 0.0
-                    total_cost = subtotal
+            base_cost = duration * hourly_rate
+            discount = base_cost * 0.15 if user["role"] == "student" else 0.0
+            subtotal = base_cost - discount
+            surcharge = subtotal * 0.20 if is_weekend else 0.0
+            total_cost = subtotal + surcharge
         else:
             hourly_rate = 20.0
-            base_cost = booking_duration * hourly_rate
-            discount_amount = 0.0
-            subtotal = base_cost
-            surcharge_amount = 0.0
+            base_cost = duration * hourly_rate
+            discount, surcharge = 0.0, 0.0
             total_cost = base_cost
 
-        # 7. Generate Confirmation Token and Store Reservation
-        random_suffix = "".join(random.choices(string.ascii_uppercase + string.digits, k=6))
-        confirmation_token = f"SKD-{booking_date.strftime('%Y%m%d')}-{random_suffix}"
-
-        booking_record = {
+        # 6. Generate confirmation token and persist
+        token = f"SKD-{booking_date.strftime('%Y%m%d')}-" + "".join(random.choices(string.ascii_uppercase + string.digits, k=6))
+        record = {
             "booking_id": self.booking_counter,
-            "confirmation_token": confirmation_token,
+            "token": token,
             "user_id": user_id,
             "room_id": room_id,
             "date": date_str,
             "start_hour": start_hour,
             "end_hour": end_hour,
-            "duration": booking_duration,
+            "duration": duration,
             "hourly_rate": hourly_rate,
             "base_cost": round(base_cost, 2),
-            "discount_amount": round(discount_amount, 2),
-            "surcharge_amount": round(surcharge_amount, 2),
+            "discount": round(discount, 2),
+            "surcharge": round(surcharge, 2),
             "total_cost": round(total_cost, 2),
-            "status": "CONFIRMED",
-            "created_at": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            "status": "CONFIRMED"
         }
-
-        self.reservations.append(booking_record)
+        self.reservations.append(record)
         self.booking_counter += 1
 
-        # Direct formatting and printing of mock multi-line email receipt
-        day_name = booking_date.strftime("%A")
-        print("\n" + "=" * 65)
-        print("          CAMPUS BOOKING SYSTEM - EMAIL RECEIPT          ")
-        print("=" * 65)
-        print(f" Confirmation Token  : {confirmation_token}")
-        print(f" Booking ID          : #{booking_record['booking_id']}")
-        print(f" Booking Status      : {booking_record['status']}")
-        print(f" Booked By           : {user['name']} (ID: {user_id}, Role: {user['role'].capitalize()})")
-        print(f" Facility / Room     : {room['room_name']} (ID: {room_id}, Type: {room['room_type'].capitalize()})")
-        print(f" Scheduled Date      : {date_str} ({day_name})")
-        print(f" Time Slot           : {start_hour:02d}:00 to {end_hour:02d}:00 ({booking_duration} Hour(s))")
-        print("-" * 65)
-        print(f" Base Pricing Rate   : ${hourly_rate:.2f} / hr")
-        print(f" Base Subtotal       : ${base_cost:.2f} ({booking_duration} hrs @ ${hourly_rate:.2f}/hr)")
-        if discount_amount > 0:
-            print(f" Student Discount    : -${discount_amount:.2f} (15% applied)")
-        else:
-            print(f" Student Discount    : $0.00 (None)")
-        if surcharge_amount > 0:
-            print(f" Weekend Surcharge   : +${surcharge_amount:.2f} (20% weekend peak applied)")
-        else:
-            print(f" Weekend Surcharge   : $0.00 (Standard weekday)")
-        print(f" Total Amount Paid   : ${total_cost:.2f}")
-        print("=" * 65)
-        print(" Thank you for reserving campus resources responsibly.")
-        print(" Please present this token upon facility entry.")
-        print("=" * 65 + "\n")
+        # 7. Print Receipt directly
+        print(f"\n[RECEIPT] Booking #{record['booking_id']} | Token: {token}")
+        print(f"  User: {user['name']} ({user['role'].title()}) | Room: {room['name']} ({room['room_type'].title()})")
+        print(f"  Slot: {date_str} {start_hour:02d}:00-{end_hour:02d}:00 ({duration} hrs)")
+        print(f"  Cost: Base ${base_cost:.2f} - Disc ${discount:.2f} + Surch ${surcharge:.2f} = Total ${total_cost:.2f}\n")
+        return record
 
-        return booking_record
-
-    # -------------------------------------------------------------------------
-    # Booking Cancellation
-    # -------------------------------------------------------------------------
     def cancel_booking(self, booking_id):
-        """
-        Cancels a booking by modifying the raw reservation dictionary directly.
-        """
-        for reservation in self.reservations:
-            if reservation["booking_id"] == booking_id:
-                if reservation["status"] == "CANCELLED":
+        for r in self.reservations:
+            if r["booking_id"] == booking_id:
+                if r["status"] == "CANCELLED":
                     print(f"[NOTICE] Booking #{booking_id} is already cancelled.")
                     return False
-                # Direct dictionary modification
-                reservation["status"] = "CANCELLED"
-                reservation["cancelled_at"] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                print(f"[CANCELLED] Booking #{booking_id} (Token: {reservation['confirmation_token']}) has been successfully CANCELLED.")
+                r["status"] = "CANCELLED"
+                print(f"[CANCELLED] Booking #{booking_id} (Token: {r['token']}) cancelled successfully.")
                 return True
-
-        print(f"[ERROR] Cancellation failed: Booking #{booking_id} not found.")
+        print(f"[ERROR] Booking #{booking_id} not found.")
         return False
 
-    # -------------------------------------------------------------------------
-    # Status Inspection Methods
-    # -------------------------------------------------------------------------
     def get_booking(self, booking_id):
-        """
-        Retrieves a raw reservation dictionary by its booking ID.
-        """
-        for reservation in self.reservations:
-            if reservation["booking_id"] == booking_id:
-                return reservation
-        return None
-
-    def print_system_status(self):
-        """
-        Inspects and displays raw dictionary state for all users, rooms, and reservations.
-        """
-        print("\n" + "#" * 70)
-        print("                 CURRENT SYSTEM STATE INSPECTION                 ")
-        print("#" * 70)
-
-        print(f"\n[REGISTERED USERS] (Total: {len(self.users)})")
-        for uid, udata in self.users.items():
-            status_flag = "Active" if udata.get("is_active") else "Inactive"
-            print(f"  * ID: {uid:<10} Name: {udata['name']:<18} Role: {udata['role']:<10} Status: {status_flag}")
-
-        print(f"\n[REGISTERED ROOMS] (Total: {len(self.rooms)})")
-        for rid, rdata in self.rooms.items():
-            status_flag = "Active" if rdata.get("is_active") else "Inactive"
-            print(f"  * ID: {rid:<10} Name: {rdata['room_name']:<22} Type: {rdata['room_type']:<10} Capacity: {rdata['capacity']:<4} Status: {status_flag}")
-
-        print(f"\n[RECORDED RESERVATIONS] (Total: {len(self.reservations)})")
-        if not self.reservations:
-            print("  (No reservations on file)")
-        for res in self.reservations:
-            print(f"  * ID #{res['booking_id']} | Token: {res['confirmation_token']} | "
-                  f"User: {res['user_id']} | Room: {res['room_id']} | "
-                  f"Date: {res['date']} ({res['start_hour']:02d}:00-{res['end_hour']:02d}:00) | "
-                  f"Cost: ${res['total_cost']:.2f} | Status: {res['status']}")
-
-        print("#" * 70 + "\n")
+        return next((r for r in self.reservations if r["booking_id"] == booking_id), None)
 
 
-# -----------------------------------------------------------------------------
-# Main Execution Demo Block
-# -----------------------------------------------------------------------------
 if __name__ == "__main__":
-    print("Initializing Campus Facility & Room Booking System (Codebase A Monolith)...")
-    system = BookingSystem()
+    print("=== Campus Room Booking System (Codebase A: Monolith) ===")
+    bs = BookingSystem()
+    bs.register_user("U-101", "Alice Johnson", "student", "alice@campus.edu")
+    bs.register_user("U-102", "Dr. Robert Smith", "faculty", "rsmith@campus.edu")
+    bs.register_room("R-SR1", "Seminar Room Alpha", "standard", 30)
+    bs.register_room("R-LB2", "Computer Vision Lab", "lab", 15)
 
-    print("\n--- 1. Registering Users ---")
-    # Register 2 users: 1 student and 1 faculty
-    system.register_user(user_id="U-101", name="Alice Johnson", role="student", email="alice@campus.edu")
-    system.register_user(user_id="U-102", name="Dr. Robert Smith", role="faculty", email="rsmith@campus.edu")
+    print("\n--- 1. Valid Bookings ---")
+    bs.create_booking("U-101", "R-SR1", "2026-10-12", 10, 12)  # Weekday Student: $40 - 15% = $34.00
+    bs.create_booking("U-102", "R-LB2", "2026-10-17", 14, 17)  # Weekend Faculty: $105 + 20% = $126.00
 
-    print("\n--- 2. Registering Rooms ---")
-    # Register 2 rooms: 1 standard classroom and 1 multimedia lab/studio
-    system.register_room(room_id="R-SR1", room_name="Seminar Room Alpha", room_type="standard", capacity=30)
-    system.register_room(room_id="R-LB2", room_name="Computer Vision Lab", room_type="lab", capacity=15)
+    print("--- 2. Schedule Conflict Test ---")
+    bs.create_booking("U-102", "R-SR1", "2026-10-12", 11, 13)
 
-    print("\n--- 3. Executing Valid Bookings ---")
-    # Valid Booking 1: Alice Johnson (Student) books Seminar Room Alpha for 2 hours on a weekday
-    # 2 hours * $20/hr = $40; with 15% student discount = $34.00
-    b1 = system.create_booking(
-        user_id="U-101",
-        room_id="R-SR1",
-        date_str="2026-10-12",  # Monday (Weekday)
-        start_hour=10,
-        end_hour=12
-    )
+    print("--- 3. Student Daily Quota Test ---")
+    bs.create_booking("U-101", "R-LB2", "2026-10-12", 15, 16)
 
-    # Valid Booking 2: Dr. Robert Smith (Faculty) books Computer Vision Lab for 3 hours on a weekend
-    # 3 hours * $35/hr = $105; weekend +20% surcharge = $126.00
-    b2 = system.create_booking(
-        user_id="U-102",
-        room_id="R-LB2",
-        date_str="2026-10-17",  # Saturday (Weekend Peak)
-        start_hour=14,
-        end_hour=17
-    )
-
-    print("\n--- 4. Triggering Schedule Conflict & Quota Rejection ---")
-    # Conflict Rejection: Attempting to book Seminar Room Alpha during overlapping hours (11:00 - 13:00)
-    print("\n[TEST CASE: Overlapping Slot Conflict]")
-    system.create_booking(
-        user_id="U-102",
-        room_id="R-SR1",
-        date_str="2026-10-12",
-        start_hour=11,
-        end_hour=13
-    )
-
-    # Quota Rejection: Student Alice attempts to book an additional hour on the same day (2-hour daily limit reached)
-    print("\n[TEST CASE: Student Daily Quota Exceeded]")
-    system.create_booking(
-        user_id="U-101",
-        room_id="R-LB2",
-        date_str="2026-10-12",
-        start_hour=15,
-        end_hour=16
-    )
-
-    # Operating Bounds Check Rejection
-    print("\n[TEST CASE: Outside Operating Bounds]")
-    system.create_booking(
-        user_id="U-102",
-        room_id="R-SR1",
-        date_str="2026-10-12",
-        start_hour=7,
-        end_hour=9
-    )
-
-    print("\n--- 5. Booking Cancellation Demonstration ---")
-    # Cancel Booking #1 directly
-    system.cancel_booking(booking_id=1)
-
-    # Now that Booking #1 is cancelled, the student should be allowed to book again on the same day!
-    print("\n[TEST CASE: Re-booking after Cancellation]")
-    system.create_booking(
-        user_id="U-101",
-        room_id="R-SR1",
-        date_str="2026-10-12",
-        start_hour=10,
-        end_hour=12
-    )
-
-    print("\n--- 6. System State Inspection ---")
-    system.print_system_status()
+    print("--- 4. Cancellation & Re-booking ---")
+    bs.cancel_booking(1)
+    bs.create_booking("U-101", "R-SR1", "2026-10-12", 10, 12)
