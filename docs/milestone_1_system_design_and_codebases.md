@@ -13,23 +13,13 @@
 
 ---
 
-<<<<<<< HEAD
-## Project Authors & Module Ownership
+## Project Contributors & Module Ownership
 
 | Contributor | Name | Student ID | Primary Focus Area | Covered Scope & Deliverables |
 | :--- | :--- | :--- | :--- | :--- |
 | **Contributor 1** | **Abdullahi Osman** | [Student ID 1] | **System Design, Codebase Generation & Code Smell Analysis** | **Sections 1, 2, and 3**<br>• System architecture & scope shrinkage rationale<br>• Prompts A & B engineering<br>• [`codebase_a/`](../codebase_a/) & [`codebase_b/`](../codebase_b/)<br>• 4 Code smells analysis & poorer quality justification |
 | **Contributor 2** | [Teammate 2] | [Student ID 2] | **Refactoring Strategy & Implementation** | **Section 4**<br>• Fowler refactoring recommendations & justifications<br>• Class & method extraction design<br>• [`refactored_codebase_a/`](../refactored_codebase_a/) |
 | **Contributor 3** | [Teammate 3] | [Student ID 3] | **Probable Results Evaluation & CI Pipeline** | **Section 5**<br>• Quantitative metrics & software quality analysis<br>• Automated test suite ([`tests/`](../tests/))<br>• GitHub Actions CI ([`.github/workflows/ci.yml`](../.github/workflows/ci.yml)) |
-=======
-## Student Information & Team Allocation
-
-| Student Role | Student Name | Student ID | Primary Focus Area | Covered Scope & Deliverables |
-| :--- | :--- | :--- | :--- | :--- |
-| **Student 1** | **Abdullahi Osman** | [Student ID 1] | **System Design, Codebase Generation & Code Smell Analysis** | **Sections 1, 2, and 3**<br>• System architecture & scope shrinkage rationale<br>• Prompts A & B engineering<br>• [`codebase_a/`](../codebase_a/) & [`codebase_b/`](../codebase_b/)<br>• 4 Code smells analysis & poorer quality justification |
-| **Student 2** | [Teammate 2] | [Student ID 2] | **Refactoring Strategy & Implementation** | **Section 4**<br>• Fowler refactoring recommendations & justifications<br>• Class & method extraction design<br>• [`refactored_codebase_a/`](../refactored_codebase_a/) |
-| **Student 3** | [Teammate 3] | [Student ID 3] | **Probable Results Evaluation & CI Pipeline** | **Section 5**<br>• Quantitative metrics & software quality analysis<br>• Automated test suite ([`tests/`](../tests/))<br>• GitHub Actions CI ([`.github/workflows/ci.yml`](../.github/workflows/ci.yml)) |
->>>>>>> 52190945a69c5f69e6375852e1d79bdd2e9a6f9c
 
 ---
 

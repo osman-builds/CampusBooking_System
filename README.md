@@ -1,5 +1,4 @@
 # Campus Facility & Room Booking System
-<<<<<<< HEAD
 
 <div align="center">
 
@@ -20,7 +19,7 @@
 
 | Category | Tools & Technologies | Description |
 | :--- | :--- | :--- |
-| **Language** | **Python 3.10+** | Zero external dependencies; standard library native (`dataclasses`, `enum`, `datetime`, `unittest`, `abc`) |
+| **Language** | **Python 3.10+** | Zero external dependencies; standard library native (`dataclasses`, `enum`, `datetime`, `unittest`, `secrets`) |
 | **Automation & CI** | **GitHub Actions** | Automated CI pipeline executing matrix builds (Python 3.10, 3.11, 3.12) and regression tests on push and PR |
 | **Testing** | **Python `unittest`** | 13 automated unit & regression tests executing in <0.02s |
 | **Design Patterns** | **SOLID & Clean Architecture** | Single Responsibility, Dependency Inversion, Repository Pattern, Strategy Pattern |
@@ -40,31 +39,6 @@
 ---
 
 ## ⚡ Quickstart Guide
-=======
-> **Reference System:** [Skedda Space Scheduling Platform](https://www.skedda.com) | **Course:** CSEB5213 Software Evolution & Maintenance  
-> **Project Type:** Group Collaborative Assignment (3-Student Team)
-
-A lightweight, simple-to-work-on campus room reservation engine comparing two architectural styles generated from identical business requirements:
-- **Codebase A (Monolith):** Single-class monolithic script ([`codebase_a/booking_system.py`](codebase_a/booking_system.py))
-- **Codebase B (Clean Architecture):** Modular, SOLID design across 3 concise files in [`codebase_b/`](codebase_b/)
-- **Refactored Codebase A:** Fowler-refactored version of Codebase A in [`refactored_codebase_a/`](refactored_codebase_a/)
-- **Automated CI Test Suite:** High-speed unit tests (<0.02s) in [`tests/test_booking.py`](tests/test_booking.py)
-- **Continuous Integration (CI):** Automated GitHub Actions workflow in [`.github/workflows/ci.yml`](.github/workflows/ci.yml)
-
----
-
-## Team Contributions & Work Allocation
-
-| Student / Collaborator | Focus Area | Deliverables & Responsibilities | Covered Scope |
-| :--- | :--- | :--- | :--- |
-| **Student 1 (Abdullahi Osman)** | System Design, Codebase Generation & Code Smell Analysis | Scoped-down architecture based on Skedda, engineered GenAI Prompts A & B, established Codebase A (Monolith) and Codebase B (Modular Clean Architecture), and conducted comparative code smell analysis (God Class, Long Method, Duplicate Code, Primitive Obsession) with poorer codebase selection. | **Sections 1, 2, and 3**<br>([`codebase_a/`](codebase_a/), [`codebase_b/`](codebase_b/)) |
-| **Student 2** | Refactoring Strategy & Implementation | Formulated Fowler refactoring recommendations (Extract Class, Extract Method, Guard Clauses, Symbolic Constants) and implemented the refactored system. | **Section 4**<br>([`refactored_codebase_a/`](refactored_codebase_a/)) |
-| **Student 3** | Quality Metrics Evaluation & CI Pipeline | Analyzed probable results, measured software quality metrics (LOC, Cyclomatic Complexity, coupling/cohesion), developed automated unit tests, and established GitHub Actions CI. | **Section 5**<br>([`tests/`](tests/), [`.github/workflows/ci.yml`](.github/workflows/ci.yml)) |
-
----
-
-## Quickstart Guide
->>>>>>> 52190945a69c5f69e6375852e1d79bdd2e9a6f9c
 
 ### 1. Prerequisites
 - **Python 3.10+** (standard library only; no external package dependencies required)
@@ -101,21 +75,6 @@ python refactored_codebase_a/booking_system.py
 ```powershell
 python -m unittest discover tests -v
 ```
-<<<<<<< HEAD
-=======
-
----
-
-## Continuous Integration (CI) with GitHub Actions
-
-The repository includes an automated CI pipeline defined in [`.github/workflows/ci.yml`](.github/workflows/ci.yml).
-
-The pipeline automatically triggers on every `push` and `pull_request` to the `main` branch across Python 3.10, 3.11, and 3.12:
-1. Validates that Codebase A (Monolith) runs successfully without errors.
-2. Validates that Codebase B (Clean Architecture) executes all domain flows and exception handling.
-3. Validates that Refactored Codebase A runs with full functional parity.
-4. Executes the full automated unit test suite (`tests/test_booking.py`) in < 1 second.
->>>>>>> 52190945a69c5f69e6375852e1d79bdd2e9a6f9c
 
 ---
 
@@ -154,16 +113,14 @@ CampusBooking_System/
 ├── cr1_corrective/                      # Prepared for Milestone 2 (Corrective CR)
 ├── cr2_adaptive/                        # Prepared for Milestone 2 (Adaptive CR)
 ├── cr3_perfective/                      # Prepared for Milestone 2 (Perfective CR)
+├── sonar-project.properties             # SonarCloud scanner configuration
+├── .sonarcloud.properties               # SonarCloud automatic analysis configuration
 └── README.md
 ```
 
 ---
 
-<<<<<<< HEAD
 ## 📑 Milestone 1 Report & Rubric Mapping
-=======
-## Milestone 1 Report & Rubric Mapping
->>>>>>> 52190945a69c5f69e6375852e1d79bdd2e9a6f9c
 
 All Milestone 1 assessment criteria are comprehensively documented in:  
 👉 **[docs/milestone_1_system_design_and_codebases.md](docs/milestone_1_system_design_and_codebases.md)**
@@ -178,11 +135,7 @@ All Milestone 1 assessment criteria are comprehensively documented in:
 
 ---
 
-<<<<<<< HEAD
 ## 🧪 Automated Test Verification
-=======
-## Automated Test Verification
->>>>>>> 52190945a69c5f69e6375852e1d79bdd2e9a6f9c
 
 Execution of `python -m unittest discover tests -v`:
 ```text
