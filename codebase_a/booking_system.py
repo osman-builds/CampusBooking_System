@@ -11,7 +11,7 @@ Designed to be small, simple, and self-contained while exhibiting classic code s
 """
 
 import datetime
-import random
+import secrets
 import string
 
 
