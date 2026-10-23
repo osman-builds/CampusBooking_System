@@ -28,13 +28,9 @@
 
 ---
 
-## 👥 Project Contributors & Module Ownership
+## 👤 Author
 
-| Contributor | Focus Area | Deliverables & Responsibilities | Covered Scope |
-| :--- | :--- | :--- | :--- |
-| **Abdullahi Osman** | System Design, Codebase Generation & Code Smell Analysis | Scoped-down architecture based on Skedda, engineered GenAI Prompts A & B, established Codebase A (Monolith) and Codebase B (Modular Clean Architecture), and conducted comparative code smell analysis (God Class, Long Method, Duplicate Code, Primitive Obsession) with poorer codebase selection. | **Sections 1, 2, and 3**<br>([`codebase_a/`](codebase_a/), [`codebase_b/`](codebase_b/)) |
-| **Contributor 2** | Refactoring Strategy & Implementation | Formulated Fowler refactoring recommendations (Extract Class, Extract Method, Guard Clauses, Symbolic Constants) and implemented the refactored system. | **Section 4**<br>([`refactored_codebase_a/`](refactored_codebase_a/)) |
-| **Contributor 3** | Quality Metrics Evaluation & CI Pipeline | Analyzed probable results, measured software quality metrics (LOC, Cyclomatic Complexity, coupling/cohesion), developed automated unit tests, and established GitHub Actions CI. | **Section 5**<br>([`tests/`](tests/), [`.github/workflows/ci.yml`](.github/workflows/ci.yml)) |
+- **Abdullahi Osman**
 
 ---
 

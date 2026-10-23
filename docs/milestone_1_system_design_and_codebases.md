@@ -9,17 +9,17 @@
 | **Weightage** | 16 Marks (out of 30 Coursework Marks) |
 | **System Title** | Campus Facility & Room Booking System |
 | **Reference System** | [Skedda Space Scheduling Platform (https://www.skedda.com)](https://www.skedda.com) |
-| **Project Group** | 3-Student Collaborative Assignment |
+| **Author** | **Abdullahi Osman** |
 
 ---
 
-## Project Contributors & Module Ownership
+## Author Information
 
-| Contributor | Name | Student ID | Primary Focus Area | Covered Scope & Deliverables |
-| :--- | :--- | :--- | :--- | :--- |
-| **Contributor 1** | **Abdullahi Osman** | [Student ID 1] | **System Design, Codebase Generation & Code Smell Analysis** | **Sections 1, 2, and 3**<br>• System architecture & scope shrinkage rationale<br>• Prompts A & B engineering<br>• [`codebase_a/`](../codebase_a/) & [`codebase_b/`](../codebase_b/)<br>• 4 Code smells analysis & poorer quality justification |
-| **Contributor 2** | [Teammate 2] | [Student ID 2] | **Refactoring Strategy & Implementation** | **Section 4**<br>• Fowler refactoring recommendations & justifications<br>• Class & method extraction design<br>• [`refactored_codebase_a/`](../refactored_codebase_a/) |
-| **Contributor 3** | [Teammate 3] | [Student ID 3] | **Probable Results Evaluation & CI Pipeline** | **Section 5**<br>• Quantitative metrics & software quality analysis<br>• Automated test suite ([`tests/`](../tests/))<br>• GitHub Actions CI ([`.github/workflows/ci.yml`](../.github/workflows/ci.yml)) |
+| Field | Details |
+| :--- | :--- |
+| **Author** | **Abdullahi Osman** |
+| **Course** | CSEB5213 Software Evolution & Maintenance |
+| **Deliverables** | System Design, Codebase Generation (A & B), Code Smell Analysis, Fowler Refactoring & Quality Verification |
 
 ---
 
@@ -62,7 +62,7 @@
 The system under experimentation is inspired by [Skedda](https://www.skedda.com), an industry-standard commercial space management and venue reservation platform. Skedda provides multi-venue visual space management, user self-service reservation rules, access control integrations, automated payment processing, and usage quota enforcement across universities, coworking spaces, and sports facilities globally.
 
 ### 1.2 System Scope & Stakeholders
-To conduct a rigorous, controlled experiment in software evolution and code maintainability, our team established a tightly scoped reservation engine modeling the essential interactions of campus facility management.
+To conduct a rigorous, controlled experiment in software evolution and code maintainability, a tightly scoped reservation engine modeling the essential interactions of campus facility management was established.
 
 The system models three primary stakeholders:
 1. **Students:** Campus learners who book seminar spaces and study rooms for academic purposes; subject to daily usage quotas (maximum 2 hours per calendar day) and eligible for special student pricing discounts (15% policy discount).
@@ -94,10 +94,10 @@ graph TD
 ### 1.4 Scope Shrinkage Rationale
 Commercial scheduling suites incorporate external network boundaries, third-party payment gateways (Stripe/PayPal), OAuth2/SAML single sign-on providers, interactive vector floor canvases, and hardware IoT door-lock relays.
 
-Our team deliberately omitted these third-party dependencies from the experimental scope for the following reasons:
+These third-party dependencies were deliberately omitted from the experimental scope for the following reasons:
 - **Isolation of Core Domain Logic:** Excluding network and UI rendering frameworks keeps the focus on the business rules, state manipulation, and algorithmic scheduling logic where code smells typically originate and persist.
 - **Determinism in Automated Testing:** Eliminating external APIs ensures that our automated unit tests and CI builds run instantaneously (< 0.02s) without mock network latency, credentials, or flaky socket connections.
-- **Controlled Refactoring Baseline:** A concise, self-contained Python architecture enables our team to measure the exact quantitative impact of refactoring on code complexity, coupling, and maintainability.
+- **Controlled Refactoring Baseline:** A concise, self-contained Python architecture enables measuring the exact quantitative impact of refactoring on code complexity, coupling, and maintainability.
 
 ---
 
@@ -157,7 +157,7 @@ Keep the design small, elegant, and simple to work on across 3 cohesive files:
 ## 3. Comparative Code Smell Analysis & Poorer Codebase Identification
 
 ### 3.1 Overview of Evaluated Code Smells
-Our team conducted an empirical code smell evaluation across both codebases, focusing on four primary candidate smells:
+An empirical code smell evaluation was conducted across both codebases, focusing on four primary candidate smells:
 1. **God Class / Large Class** (*Critical*)
 2. **Long Method & High Cyclomatic Complexity** (*Critical*)
 3. **Duplicate Code** (*Significant*)
@@ -290,14 +290,14 @@ total_cost = round(subtotal + surcharge, 2)
 ---
 
 ### 3.6 Rigorous Justification of Poorer Quality Codebase (Codebase A Selection)
-Based on software engineering quality criteria, **our team concluded that Codebase A is significantly poorer in quality than Codebase B**.
+Based on software engineering quality criteria, **Codebase A is concluded to be significantly poorer in quality than Codebase B**.
 
 #### Selection Justification & Threshold Analysis:
 1. **Defect Threshold & Code Smell Density:** Codebase A exhibits **4 major code smells** concentrated within a single 180-line class, whereas Codebase B exhibits zero critical smells across its 3 modular files.
 2. **Maintenance Ripple Effect:** In Codebase A, any change to business logic (e.g., modifying student quota limit from 2 to 3 hours, altering pricing discount, or changing date format) forces edits directly inside the monolithic `create_booking` method. In contrast, Codebase B confines changes strictly to the relevant service (`ConflictDetector` or `PricingService`).
 3. **Regression Safety & Testability:** In Codebase A, unit tests cannot evaluate pricing math or conflict logic without instantiating the entire system state and relying on standard output print capture. In Codebase B, each domain service can be tested in isolation with zero side effects.
 
-Therefore, **Codebase A was selected by our team as the candidate codebase for refactoring in Milestone 1**.
+Therefore, **Codebase A was selected as the candidate codebase for refactoring in Milestone 1**.
 
 ---
 
@@ -409,7 +409,7 @@ While refactoring significantly elevates quality, several trade-offs must be not
 3. **Data Encapsulation Limitation:** While classes were extracted, reservations still utilize native Python dictionaries rather than strict dataclass value objects. Full type safety is fully realized in Codebase B.
 
 ### 5.4 Automated Continuous Integration (CI) Test Suite Verification
-To establish a robust Continuous Integration (CI) safety net and support automated regression testing, our team developed a comprehensive, lightweight automated test suite in [`tests/test_booking.py`](../tests/test_booking.py) and a GitHub Actions workflow in [`.github/workflows/ci.yml`](../.github/workflows/ci.yml).
+To establish a robust Continuous Integration (CI) safety net and support automated regression testing, a comprehensive, lightweight automated test suite was developed in [`tests/test_booking.py`](../tests/test_booking.py) alongside a GitHub Actions workflow in [`.github/workflows/ci.yml`](../.github/workflows/ci.yml).
 
 The test suite runs 13 automated tests across all three systems (Codebase A, Codebase B, and Refactored Codebase A) in **0.014 seconds** (< 1 second threshold):
 - Verifies exact pricing parity across weekday and weekend bookings
