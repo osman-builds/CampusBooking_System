@@ -38,6 +38,18 @@ jobs:
         run: |
           python refactored_codebase_a/booking_system.py
 
+      - name: Validate Milestone 2 CR-01 (Corrective) Execution
+        run: |
+          python cr1_corrective/main.py
+
+      - name: Validate Milestone 2 CR-02 (Adaptive - SQLite3 & UTC+08:00) Execution
+        run: |
+          python cr2_adaptive/main.py
+
+      - name: Validate Milestone 2 CR-03 (Perfective) Execution
+        run: |
+          python cr3_perfective/main.py
+
       - name: Run Automated Unit & Regression Tests
         run: |
           python -m unittest discover tests -v
