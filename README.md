@@ -28,9 +28,7 @@
 
 ---
 
-## 👤 Author
 
-- **Abdullahi Osman**
 
 ---
 
