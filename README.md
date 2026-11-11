@@ -3,6 +3,7 @@
 <div align="center">
 
 [![CI - Build & Test](https://img.shields.io/badge/CI-Passing-brightgreen?style=for-the-badge&logo=github-actions&logoColor=white)](.github/workflows/ci.yml)
+[![Quality gate](https://sonarcloud.io/api/project_badges/quality_gate?project=osman-builds_CampusBooking_System&token=bef713a6ca2db7df5b52c81f08230f2f605f667b)](https://sonarcloud.io/summary/new_code?id=osman-builds_CampusBooking_System)
 [![Python](https://img.shields.io/badge/Python-3.10%20%7C%203.11%20%7C%203.12-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
 [![Tests](https://img.shields.io/badge/Tests-23%20Passed-success?style=for-the-badge&logo=pytest&logoColor=white)](tests/)
 [![Architecture](https://img.shields.io/badge/Architecture-Clean%20%26%20SOLID-00599C?style=for-the-badge)](codebase_b/)
