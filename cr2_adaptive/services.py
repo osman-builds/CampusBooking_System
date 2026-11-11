@@ -18,7 +18,7 @@ import string
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional
 
 try:
     from .models import (
@@ -192,7 +192,7 @@ class SQLiteBookingRepository(AbstractBookingRepository):
     Uses Python's standard library sqlite3 with ACID transactions and parameterized SQL.
     """
 
-    def __init__(self, db_path: Union[str, Path] = ":memory:"):
+    def __init__(self, db_path: str | Path = ":memory:"):
         self.db_path = str(db_path)
         try:
             self._conn = sqlite3.connect(self.db_path)

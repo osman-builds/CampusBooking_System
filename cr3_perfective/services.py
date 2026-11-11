@@ -140,9 +140,11 @@ class SilentNotificationService(AbstractNotificationService):
     """No-op notification adapter for quiet automated testing and high-throughput benchmarks."""
 
     def notify_confirmed(self, res: Reservation, user: User, room: Room, breakdown: PricingBreakdown) -> None:
+        # Intentionally empty: Null-Object pattern suppresses stdout during silent batch/test runs.
         pass
 
     def notify_cancelled(self, res: Reservation) -> None:
+        # Intentionally empty: Null-Object pattern suppresses stdout during silent batch/test runs.
         pass
 
 
@@ -267,7 +269,6 @@ class BookingService:
         end_hour: int,
         attendees: int = 1,
     ) -> Reservation:
-        # 1. User & Room validation
         user = self.repo.get_user(user_id)
         if not user or not user.is_active:
             raise ResourceNotFoundError(f"Active user '{user_id}' not found.")
@@ -276,16 +277,16 @@ class BookingService:
         if not room or not room.is_active:
             raise ResourceNotFoundError(f"Active room '{room_id}' not found.")
 
-        # 2. Operating hours & Room capacity validation
+        # Operating hours & Room capacity validation
         self._validate_operating_window(start_hour, end_hour)
         self._validate_capacity(room, attendees)
 
-        # 3. O(1)-indexed collision validation
+        # O(1)-indexed collision validation
         existing_room_bookings = self.repo.find_by_room_and_date(room_id, date_str)
         if self.conflict.has_overlap(existing_room_bookings, start_hour, end_hour):
             raise SlotConflictError(f"Room '{room.name}' is already reserved for requested time on {date_str}.")
 
-        # 4. O(1)-indexed student quota validation
+        # O(1)-indexed student quota validation
         duration = end_hour - start_hour
         if user.is_student():
             user_bookings = self.repo.find_by_user_and_date(user_id, date_str)
@@ -294,10 +295,9 @@ class BookingService:
                     f"Student '{user.name}' exceeded daily quota of {self.STUDENT_DAILY_LIMIT} hours."
                 )
 
-        # 5. Pricing calculation via PricingService
         breakdown = self.pricing.calculate(room, user, date_str, duration)
 
-        # 6. Generate confirmation token, persist, and dispatch decoupled notification
+        # Generate confirmation token, persist, and dispatch decoupled notification
         clean_date = date_str.replace("-", "")
         suffix = "".join(secrets.choice(string.ascii_uppercase + string.digits) for _ in range(6))
         token = f"SKD-{clean_date}-{suffix}"
