@@ -18,7 +18,7 @@ import string
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Mapping, Optional
 
 try:
     from .models import (
@@ -331,7 +331,7 @@ class SQLiteBookingRepository(AbstractBookingRepository):
         return dt.astimezone(CAMPUS_TIMEZONE)
 
     @staticmethod
-    def _row_to_reservation(row: sqlite3.Row) -> Reservation:
+    def _row_to_reservation(row: Mapping[str, Any]) -> Reservation:
         parsed_dt = datetime.datetime.fromisoformat(row["created_at"])
         if parsed_dt.tzinfo is None:
             parsed_dt = parsed_dt.replace(tzinfo=CAMPUS_TIMEZONE)
